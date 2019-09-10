@@ -1,0 +1,59 @@
+' {$STAMP BS1}
+OUTPUT 2  'H-Bridge
+OUTPUT 3  'H-Bridge
+OUTPUT 0  'Servo
+INPUT 4   'Taster
+B3 = 120  'Start-Wert für die Lenkung, Variabel für das lenken
+
+beginn:   'Programm Start
+DEBUG CR, "Programm startet"  'Ausgabe als Rückmeldung
+FOR B2=0 TO 15          'Erstmal Servo-Grundestellung - Gerade aus stellen
+  LOW 0
+  PULSOUT 0, 150
+  PAUSE 20
+  NEXT B2
+  HIGH 0
+wait:                      'Warte-Schleife für den Taster                  
+  POT 4, 80, B0            'Abfrage ob Taster gedrückt ist (kann man auch durchaus mit POT machen - Ein Taster ist nichts anderes als ein Sensor)
+  IF B0 < 100 THEN wait     'Falls dieser nicht gedrückt wurde, warte weiter
+
+start:                    'Falls er gedrückt wurde, fange mit dem eigentich Program an
+  POT 1, 80, B0           'Schau beim LDR nach, ob das Fahrzeug gerade über Schwarz fährt
+  DEBUG B0                'Zur Kontrolle eine Ausgabe
+  IF B0 > 60 THEN lenkung           'Falls man über Schwarz ist, soll man lenken, ansonsten kann man weiter fahren
+  POT 4, 80, B0                     'Vor dem weiter fahren aber noch mal schauen, ob der Taster gedrückt wurde, um das Programm zu unterbrechen und zur Start-Schleife zurück zu gehen
+  IF B0 > 100 THEN beginn           'If Abfrage zum oben stehenden (Zeile drüber)
+  FOR B1=0 TO 25                    'Ein Stück fahren, bevor Taster und Schwarze Farbe noch mal Abgefragt werden
+    LOW 3
+    PWM 2,150,10
+    LOW 2
+    NEXT B1
+  GOTO start      'Gehe zum Start zurück (also die Abfrage ob Schwarz und ob der Taster gedrückt wurde)
+
+lenkung:          'Hier fängt der Part mit der Lenkung an, wenn man über Schwarz gefahren ist.
+DEBUG CR, "lenken"      'Ausgeben, dass das Fahrzeug jetzt lenkt
+if B3 = 120 then rechts 'Abfrage, in welche Richtung das Fahrzeug zuletzt lenkte - und dies dann zu wechseln
+B3 - 60                 'wenn zuvor 180 (rechts) war, rechne - 60 um auf 120 (links) zu kommen
+lenken:                 'Dies ist der Abschnitt zum lenken.
+  FOR B2=0 TO 15        'Stelle den Servo in die gewünschte Richtung (links oder rechts)
+    LOW 0
+    PULSOUT 0, B3
+    PAUSE 20
+    NEXT B2
+    HIGH 0
+  FOR B1=0 TO 50        'Fahre ein Stück
+    LOW 3
+    PWM 2,150,10
+    LOW 2
+    NEXT B1
+  FOR B2=0 TO 15        'stelle den Servo gerade
+    LOW 0
+    PULSOUT 0, 150
+    PAUSE 20
+    NEXT B2
+    HIGH 0
+  GOTO start            'gehe zurück zur Schwarz/Taster abfrage
+
+  rechts:               'falls das Fahrzeug zuvo links war, springe hier hin
+    B3 + 60             'wie obrige Rechnung 120 + 60 = 180 = rechts rum
+    GOTO lenken         'gehe jetzt zum Lenkungs-Part

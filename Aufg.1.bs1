@@ -1,0 +1,49 @@
+' {$STAMP BS1}
+OUTPUT 2
+OUTPUT 3
+
+GOTO left
+PAUSE 500
+GOTO right
+PAUSE 500
+
+left:
+DEBUG "links"
+FOR B2=0 TO 15
+  LOW 0
+  PULSOUT 0, 150
+  PAUSE 20
+  NEXT B2
+  HIGH 0
+POT 1, 80, B0
+DEBUG B0
+PAUSE 20
+IF B0 > 100 THEN Ende
+  GOTO fahren
+
+right:
+DEBUG "rechts"
+FOR B2=0 TO 15
+  LOW 0
+  PULSOUT 0, 150
+  PAUSE 20
+  NEXT B2
+  HIGH 0
+POT 1, 80, B0
+DEBUG B0
+IF B0 > 100 THEN Ende
+  GOTO fahren
+
+fahren:
+FOR B1=1 TO 30
+  LOW 2
+  PWM 3,150,10
+  LOW 3
+
+Ende:
+DEBUG "Hab was"
+PAUSE 20
+END
+
+
+

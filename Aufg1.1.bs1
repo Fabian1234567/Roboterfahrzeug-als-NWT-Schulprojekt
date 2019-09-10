@@ -1,0 +1,12 @@
+' {$STAMP BS1}
+
+INPUT 4
+
+Start:
+  POT 1, 80, B0
+  DEBUG B0
+IF PIN4 = 1 THEN tun Start
+  GOTO Start
+
+tun:
+DEBUG "Hallo"

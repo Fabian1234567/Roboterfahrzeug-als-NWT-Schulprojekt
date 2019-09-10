@@ -1,0 +1,41 @@
+' {$STAMP BS1}
+OUTPUT 3  'H-Bridge
+OUTPUT 2  'H-Bridge
+OUTPUT 0  'Servo
+
+FOR B2=0 TO 30    'Stelle zur Sicherheit am Anfang den Servo gerade
+  LOW 0
+  PULSOUT 0, 150
+  PAUSE 20
+  NEXT B2
+  HIGH 0
+gehe:             'hier fängt das eigentliche Programm erst an
+FOR B1=1 TO 10    'fahre erst mal ein schnelles Stück gerade aus, um nicht auf Schwarz zu sein
+  LOW 2
+  PWM 3,200,10
+  LOW 3
+  NEXT B1
+gerade:           'Der Part, wo das Fahrzeug fährt und zwischen drin auch misst
+FOR B1=1 TO 2     'ganz schneller, kleiner Motor schritt
+  LOW 2
+  PWM 3,200,10
+  LOW 3
+  NEXT B1
+  POT 1, 80, B0     'Messe den Wert vom LDR
+DEBUG CR, B0        'gebe diesen als Kontrolle aus
+  IF B0 < 70 THEN gerade  'Falls dieser unter 70 ist (weiß), soll das Fahrzeug weiter schauen, wo der schwarze Streifen kommt                
+FOR B1=1 TO 10      'Falls Schwarz erkannt wurden ist, springe hier hin. Fahre dann ein schnelles Stück zurück, um nicht auf Schwarz zu sein (Wie oben nur in die andere Richtung)
+  LOW 3
+  PWM 2,200,10
+  LOW 2
+  NEXT B1
+zurueck:            'Hier fährt das Auto ein schnelle Stücke zurückt und misst, ob schwarz da ist
+FOR B1=1 TO 2       'kleine, schnelle Schritte zurück
+  LOW 3
+  PWM 2,200,10
+  LOW 2
+  NEXT B1
+  POT 1, 80, B0     'LDR messen
+DEBUG CR, B0        'Den Wert zur Kontrolle ausgeben
+  IF B0 > 70 THEN gehe      'Falls dieser über 70 ist, ändere die Richtung und springe zum Start (gehe)
+GOTO zurueck:       'Wenn nicht, schau weiter wann Schwarz kommt

@@ -1,0 +1,65 @@
+' {$STAMP BS1}
+OUTPUT 2
+OUTPUT 3
+B8 = 0
+
+Start:
+B8 = B8 + 1
+IF B8 > 10 THEN ender
+  POT 1, 80, B0
+DEBUG B0
+  IF B0 < 50 THEN fahren
+  IF B0 > 60 THEN zurueck
+  GOTO ende
+
+ende:
+DEBUG CR, "Gefunden"
+END
+
+zurueck:
+DEBUG CR, "zurueck"
+FOR B2=0 TO 15
+  LOW 0
+  PULSOUT 0, 120
+  PAUSE 20
+  NEXT B2
+  HIGH 0
+  GOTO bfahren
+
+fahren:
+FOR B1=1 TO 50
+  LOW 3
+  PWM 2,500,10
+  LOW 2
+GOTO gerade
+
+gerade:
+FOR B2=0 TO 15
+  LOW 0
+  PULSOUT 0, 150
+  PAUSE 20
+  NEXT B2
+  HIGH 0
+  GOTO Start
+
+bfahren:
+FOR B1=1 TO 100
+  LOW 2
+  PWM 3,500,100
+  LOW 3
+  GOTO gerade
+
+ender:
+   DEBUG CR, "richtungswechsel"
+FOR B2=0 TO 15
+  LOW 0
+  PULSOUT 0, 180
+  PAUSE 20
+  NEXT B2
+  HIGH 0
+FOR B1=1 TO 80
+  LOW 3
+  PWM 2,500,10
+  LOW 2
+  B8 = 0
+GOTO Start

@@ -1,0 +1,63 @@
+' {$STAMP BS1}
+'An welchen Port was angeschlossen ist
+OUTPUT 2      'H-Bridge
+OUTPUT 3      'H-Bridge
+OUTPUT 0      'Servo
+B8 = 0        'Start-Wert für die Auto-Umlenk Variabel
+
+Start:        'Programm-Start
+B8 = B8 + 1   'Ändere die Auto-Umlenk Variabel um 1
+IF B8 > 10 THEN ender     'Falls die Auto-Umlenk Variabel 10 beträgt, gehe zur Richtungs-Änderung
+  POT 1, 80, B0           'Messe den Wert vom LDR, um heraus zufinden, auf welchem Untergrund man sich befindet 
+DEBUG B0                  'Gebe zur Kontrolle diesen Wert aus
+  IF B0 < 50 THEN fahren  'Falls dieser unter 50 liegt, ist es weiß --> fahre weiter
+  IF B0 > 60 THEN zurueck 'Falls dieser über 60 liegt, ist es schwarz --> fahre ein Stück zurück
+DEBUG CR, "Gefunden"      'alles zwischen 50 und 60, ist es grau --> Blatt gefunden (gebe dies hier auch als Ausgabe aus)
+END                       'da dass Blatt gefunden wurde, beende das Programm
+
+zurueck:                  'der Part für den Fall, der Roboter kommt auf Schwarz
+DEBUG CR, "zurueck"       'sag mir, dass er zurück fährt
+FOR B2=0 TO 15            'stelle den Servo auf links
+  LOW 0
+  PULSOUT 0, 120
+  PAUSE 20
+  NEXT B2
+  HIGH 0
+FOR B1=1 TO 60            'Fahre ein Stück zurück
+  LOW 2
+  PWM 3,100,10       
+  LOW 3
+  NEXT B1
+  GOTO gerade             'Jetzt ist der Roboter weg vom Schwarzen, bedeutet er kann wie davor weiter machen, doch davor muss der Servo erstmal gerade gestellt werden (er springt zu diesen Part)
+
+fahren:                   'der Part ist, wenn das Fahrzeug über die weiße Fläche fährt
+FOR B1=1 TO 5             'Das Fahrzeug soll dann nur ein Stück weiter fahren
+  LOW 3
+  PWM 2,100,10
+  LOW 2
+NEXT B1                   'Wenn dies getan wurde springt das Programm in die nächste Zeile um zur Kontrolle den Servo grade zu stellen
+gerade:                   'Hier wird soll der Servo gerade gestellt werden. Andere Programm Abschnitte springen auch hier hin
+FOR B2=0 TO 30            'Servo wird gerade gestellt
+  LOW 0
+  PULSOUT 0, 150
+  PAUSE 20
+  NEXT B2
+  HIGH 0
+  GOTO Start            'gehe wieder zum Anfang
+
+
+ender:                    'springe hier hin, wenn die Richtung einfach so nach einer Zeit geändert werden soll (erhöht die Chance das graue zu finden)
+   DEBUG CR, "richtungswechsel"   'zeige an, dass er die Richtung wechselt
+FOR B2=0 TO 20                    'stelle den Servo auf rechts
+  LOW 0
+  PULSOUT 0, 180
+  PAUSE 20
+  NEXT B2
+  HIGH 0
+FOR B1=1 TO 15          'Fahre jetzt ein Stück
+  LOW 3
+  PWM 2,100,10
+  LOW 2
+  B8 = 0
+  NEXT B1
+  GOTO gerade           'stelle den Servo wieder gerade (springe zum jeweiligen Part)
