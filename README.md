@@ -19,3 +19,6 @@ Erledigt!
 - Aufgabe 3: Das Fahrzeug soll zwischen zwei schwarzen, 10 cm breiten Streifen möglichst schnell
 hin und her fahren. Dabei darf das Fahrzeug nicht vollständig über einen Streifen hinaus fahren.
 Erledigt!
+
+
+- If you have any questions please contact me at fabian.exel@gmx.de -
